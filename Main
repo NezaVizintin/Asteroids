@@ -6,6 +6,8 @@ import random
 # globals for user interface
 WIDTH = 800
 HEIGHT = 600
+FIRING_ANGLE_VEL_INC = 0.02
+
 score = 0
 lives = 3
 time = 0
@@ -101,11 +103,14 @@ class Ship:
         self.radius = info.get_radius()
         
     def draw(self,canvas):
-        canvas.draw_circle(self.pos, self.radius, 1, "White", "White")
+        if self.thrust:
+            canvas.draw_image(ship_image, [3 * self.image_center[0], self.image_center[0]], self.image_size, self.pos, self.image_size)
+        else:
+            canvas.draw_image(ship_image, self.image_center, self.image_size, self.pos, self.image_size)
 
     def update(self):
         pass
-    
+               
     
 # Sprite class
 class Sprite:
@@ -129,9 +134,18 @@ class Sprite:
         canvas.draw_circle(self.pos, self.radius, 1, "Red", "Red")
     
     def update(self):
-        pass        
+        pass
 
+#key handlers
+def keydown(key):    
+    if key == simplegui.KEY_MAP["up"]:
+        my_ship.thrust = True
+        
+def keyup(key):
+   if key == simplegui.KEY_MAP["up"]:
+        my_ship.thrust = False
            
+#draw handler
 def draw(canvas):
     global time
     
@@ -168,7 +182,8 @@ a_missile = Sprite([2 * WIDTH / 3, 2 * HEIGHT / 3], [-1,1], 0, 0, missile_image,
 
 # register handlers
 frame.set_draw_handler(draw)
-
+frame.set_keydown_handler(keydown)
+frame.set_keyup_handler(keyup)
 timer = simplegui.create_timer(1000.0, rock_spawner)
 
 # get things rolling
