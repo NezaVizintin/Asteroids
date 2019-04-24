@@ -104,14 +104,18 @@ class Ship:
         
     def draw(self,canvas):
         if self.thrust:
-            canvas.draw_image(ship_image, [3 * self.image_center[0], self.image_center[0]], self.image_size, self.pos, self.image_size)
+            canvas.draw_image(self.image, [3 * self.image_center[0], self.image_center[0]], self.image_size, self.pos, self.image_size, self.angle)
         else:
-            canvas.draw_image(ship_image, self.image_center, self.image_size, self.pos, self.image_size)
+            canvas.draw_image(self.image, self.image_center, self.image_size, self.pos, self.image_size, self.angle)
 
     def update(self):
-        pass
-               
-    
+        self.angle += self.angle_vel        
+        
+        if self.thrust:
+            self.vel = angle_to_vector(self.angle)
+            self.pos[0] += self.vel[0]
+            self.pos[1] += self.vel[1]
+                 
 # Sprite class
 class Sprite:
     def __init__(self, pos, vel, ang, ang_vel, image, info, sound = None):
@@ -138,12 +142,22 @@ class Sprite:
 
 #key handlers
 def keydown(key):    
+    if key == simplegui.KEY_MAP["right"]:
+        my_ship.angle_vel = FIRING_ANGLE_VEL_INC
+    elif key == simplegui.KEY_MAP["left"]:
+        my_ship.angle_vel = -FIRING_ANGLE_VEL_INC
+        
     if key == simplegui.KEY_MAP["up"]:
         my_ship.thrust = True
+        ship_thrust_sound.play()
         
 def keyup(key):
-   if key == simplegui.KEY_MAP["up"]:
+    if key == simplegui.KEY_MAP["right"] or key == simplegui.KEY_MAP["left"]:
+        my_ship.angle_vel = 0
+    
+    if key == simplegui.KEY_MAP["up"]:
         my_ship.thrust = False
+        ship_thrust_sound.rewind()
            
 #draw handler
 def draw(canvas):
