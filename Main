@@ -7,7 +7,7 @@ import random
 WIDTH = 800
 HEIGHT = 600
 FIRING_ANGLE_VEL_INC = 0.02
-FRICTION = 0.0992
+FRICTION = 0.992
 
 score = 0
 lives = 3
@@ -110,20 +110,25 @@ class Ship:
             canvas.draw_image(self.image, self.image_center, self.image_size, self.pos, self.image_size, self.angle)
 
     def update(self):
+        #update angle from keyhandler
         self.angle += self.angle_vel        
-        
+
+        #accelarate towards where ship is pointed
         if self.thrust:
             vector = angle_to_vector(self.angle)
             
             self.vel[0] += vector[0] / 15
             self.vel[1] += vector[1] / 15
         
-        self.vel[0] *= FRICTION	
-        self.vel[1] *= FRICTION
-        
+        #update position (move ship)
         self.pos[0] += self.vel[0]
         self.pos[1] += self.vel[1]
         
+        #slow down/stop ship
+        self.vel[0] *= FRICTION	
+        self.vel[1] *= FRICTION
+        
+        #wrap position (when ship touches edge of screen, comes out on the other side)
         if self.pos[0] <= 0:
             self.pos[0] = WIDTH
         elif self.pos[0] >= WIDTH:
@@ -152,26 +157,42 @@ class Sprite:
             sound.play()
    
     def draw(self, canvas):
-        canvas.draw_circle(self.pos, self.radius, 1, "Red", "Red")
+        canvas.draw_image(self.image, self.image_center, self.image_size, self.pos, self.image_size, self.angle)
     
     def update(self):
-        pass
-
+        #update position (move ship)
+        self.pos[0] += self.vel[0]
+        self.pos[1] += self.vel[1]  
+            
+        #wrap position (when ship touches edge of screen, comes out on the other side)
+        if self.pos[0] <= 0:
+            self.pos[0] = WIDTH
+        elif self.pos[0] >= WIDTH:
+            self.pos[0] = 0
+        elif self.pos[1] <= 0:
+            self.pos[1] = HEIGHT
+        elif self.pos[1] >= HEIGHT:
+            self.pos[1] = 0   
+            
 #key handlers
 def keydown(key):    
+    #turn ship
     if key == simplegui.KEY_MAP["right"]:
         my_ship.angle_vel = FIRING_ANGLE_VEL_INC
     elif key == simplegui.KEY_MAP["left"]:
         my_ship.angle_vel = -FIRING_ANGLE_VEL_INC
-        
+    
+    #ship thrusters (accelerate)    
     if key == simplegui.KEY_MAP["up"]:
         my_ship.thrust = True
         ship_thrust_sound.play()
         
 def keyup(key):
+    #stop turning ship
     if key == simplegui.KEY_MAP["right"] or key == simplegui.KEY_MAP["left"]:
         my_ship.angle_vel = 0
     
+    #stop ship thrusters (accelerate)    
     if key == simplegui.KEY_MAP["up"]:
         my_ship.thrust = False
         ship_thrust_sound.rewind()
@@ -208,7 +229,7 @@ frame = simplegui.create_frame("Asteroids", WIDTH, HEIGHT)
 
 # initialize ship and two sprites
 my_ship = Ship([WIDTH / 2, HEIGHT / 2], [0, 0], 0, ship_image, ship_info)
-a_rock = Sprite([WIDTH / 3, HEIGHT / 3], [1, 1], 0, 0, asteroid_image, asteroid_info)
+a_rock = Sprite([WIDTH / 3, HEIGHT / 3], [1, 1], 1.6, 0.2, asteroid_image, asteroid_info)
 a_missile = Sprite([2 * WIDTH / 3, 2 * HEIGHT / 3], [-1,1], 0, 0, missile_image, missile_info, missile_sound)
 
 # register handlers
