@@ -160,6 +160,8 @@ class Sprite:
         canvas.draw_image(self.image, self.image_center, self.image_size, self.pos, self.image_size, self.angle)
     
     def update(self):
+        #update angle from keyhandler
+        self.angle += self.angle_vel
         #update position (move ship)
         self.pos[0] += self.vel[0]
         self.pos[1] += self.vel[1]  
@@ -179,9 +181,10 @@ def keydown(key):
     #turn ship
     if key == simplegui.KEY_MAP["right"]:
         my_ship.angle_vel = FIRING_ANGLE_VEL_INC
+        print my_ship.angle
     elif key == simplegui.KEY_MAP["left"]:
         my_ship.angle_vel = -FIRING_ANGLE_VEL_INC
-    
+        print my_ship.angle
     #ship thrusters (accelerate)    
     if key == simplegui.KEY_MAP["up"]:
         my_ship.thrust = True
@@ -222,14 +225,19 @@ def draw(canvas):
             
 # timer handler that spawns a rock    
 def rock_spawner():
-    pass
+    global a_rock
+    
+    position = [random.randrange(0, WIDTH), random.randrange(0, HEIGHT)]
+    angle = random.randrange(0, 7)
+    angle_vel = random.choice([0.02, -0.02])
+    a_rock = Sprite(position, [1, 1], angle, angle_vel, asteroid_image, asteroid_info)
     
 # initialize frame
 frame = simplegui.create_frame("Asteroids", WIDTH, HEIGHT)
 
 # initialize ship and two sprites
 my_ship = Ship([WIDTH / 2, HEIGHT / 2], [0, 0], 0, ship_image, ship_info)
-a_rock = Sprite([WIDTH / 3, HEIGHT / 3], [1, 1], 1.6, 0.2, asteroid_image, asteroid_info)
+a_rock = Sprite([WIDTH / 3, HEIGHT / 3], [1, 1], 0, 0, asteroid_image, asteroid_info)
 a_missile = Sprite([2 * WIDTH / 3, 2 * HEIGHT / 3], [-1,1], 0, 0, missile_image, missile_info, missile_sound)
 
 # register handlers
