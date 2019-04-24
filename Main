@@ -7,6 +7,7 @@ import random
 WIDTH = 800
 HEIGHT = 600
 FIRING_ANGLE_VEL_INC = 0.02
+FRICTION = 0.0992
 
 score = 0
 lives = 3
@@ -112,10 +113,26 @@ class Ship:
         self.angle += self.angle_vel        
         
         if self.thrust:
-            self.vel = angle_to_vector(self.angle)
-            self.pos[0] += self.vel[0]
-            self.pos[1] += self.vel[1]
-                 
+            vector = angle_to_vector(self.angle)
+            
+            self.vel[0] += vector[0] / 15
+            self.vel[1] += vector[1] / 15
+        
+        self.vel[0] *= FRICTION	
+        self.vel[1] *= FRICTION
+        
+        self.pos[0] += self.vel[0]
+        self.pos[1] += self.vel[1]
+        
+        if self.pos[0] <= 0:
+            self.pos[0] = WIDTH
+        elif self.pos[0] >= WIDTH:
+            self.pos[0] = 0
+        elif self.pos[1] <= 0:
+            self.pos[1] = HEIGHT
+        elif self.pos[1] >= HEIGHT:
+            self.pos[1] = 0      
+            
 # Sprite class
 class Sprite:
     def __init__(self, pos, vel, ang, ang_vel, image, info, sound = None):
