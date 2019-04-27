@@ -146,8 +146,9 @@ class Ship:
     def shoot(self):
         global a_missile
         
+        missile_pos = [self.pos[0] + self.vector[0] * self.radius, self.pos[1] + self.vector[1] * self.radius]
         missile_vel = [self.vel[0] + 7 * self.vector[0], self.vel[1] + 7 * self.vector[1]]
-        a_missile = Sprite(self.pos, missile_vel, 0, 0, missile_image, missile_info, missile_sound)
+        a_missile = Sprite(missile_pos, missile_vel, 0, 0, missile_image, missile_info, missile_sound)
 
 # Sprite class
 class Sprite:
@@ -231,8 +232,8 @@ def draw(canvas):
     a_missile.update()
     
     #draw score and lives
-    canvas.draw_text('Score: ' + str(score), [30, 50], 30, 'White')
-    canvas.draw_text('Lives: ' + str(lives), [WIDTH - 150, 50], 30, 'Yellow')
+    canvas.draw_text('Score: ' + str(score), [WIDTH - 150, 50], 30, 'White')
+    canvas.draw_text('Lives: ' + str(lives), [30, 50], 30, 'Yellow')
     
 # timer handler that spawns a rock    
 def rock_spawner():
