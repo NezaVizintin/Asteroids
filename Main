@@ -260,8 +260,9 @@ def rock_spawner():
     angle = random.randrange(0, 7)
     angle_vel = random.choice([0.02, -0.02])
     velocity = [random.randrange(-1, 1), random.randrange(-1, 1)]
-    a_rock(Sprite(position, velocity, angle, angle_vel, asteroid_image, asteroid_info))
-        
+
+    a_rock = Sprite(position, velocity, angle, angle_vel, asteroid_image, asteroid_info)
+            
 # initialize frame
 frame = simplegui.create_frame("Asteroids", WIDTH, HEIGHT)
 
