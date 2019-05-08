@@ -9,6 +9,9 @@ HEIGHT = 600
 FIRING_ANGLE_VEL_INC = 0.02
 FRICTION = 0.992
 
+rocks = set([])
+missiles = set([])
+
 score = 0
 lives = 3
 time = 0
@@ -101,6 +104,15 @@ def wrap_screen(pos):
         elif pos[1] >= HEIGHT:
             pos[1] = 0 
 
+def proccess_sprite_group(group, canvas):
+    remove_sprites = []
+    for sprite in group:
+        sprite.update()
+        sprite.draw(canvas)
+        if sprite.update():
+            remove_sprites.append(sprite)
+        group.difference_update(remove_sprites)
+                
 # Ship class
 class Ship:
     def __init__(self, pos, vel, angle, image, info):
@@ -114,7 +126,6 @@ class Ship:
         self.image_size = info.get_size()
         self.radius = info.get_radius()
         self.vector = angle_to_vector(self.angle)
-
         
     def draw(self,canvas):
         if self.thrust:
@@ -132,7 +143,7 @@ class Ship:
         if self.thrust:
             self.vel[0] += self.vector[0] / 15
             self.vel[1] += self.vector[1] / 15
-        
+                 
         #update position (move ship)
         self.pos[0] += self.vel[0]
         self.pos[1] += self.vel[1]
@@ -142,14 +153,14 @@ class Ship:
         self.vel[1] *= FRICTION
         
         #wrap position (when ship touches edge of screen, comes out on the other side)
-        wrap_screen(self.pos)   
-            
+        wrap_screen(self.pos)
+                   
     def shoot(self):
-        global a_missile
+        global missiles
         
         missile_pos = [self.pos[0] + self.vector[0] * self.radius, self.pos[1] + self.vector[1] * self.radius]
         missile_vel = [self.vel[0] + 7 * self.vector[0], self.vel[1] + 7 * self.vector[1]]
-        a_missile = Sprite(missile_pos, missile_vel, 0, 0, missile_image, missile_info, missile_sound)
+        missiles.add(Sprite(missile_pos, missile_vel, 0, 0, missile_image, missile_info, missile_sound))
 
 # Sprite class
 class Sprite:
@@ -180,9 +191,14 @@ class Sprite:
         self.pos[0] += self.vel[0]
         self.pos[1] += self.vel[1]  
             
-        wrap_screen(self.pos)   
+        wrap_screen(self.pos)
+        
+        #determine age
+        self.age += 1
+        if type(self.lifespan) == int and self.age >= self.lifespan:
+            return True
+        return False
       
-
 #key and mouse handlers
 def keydown(key):    
     #turn ship
@@ -235,48 +251,44 @@ def draw(canvas):
 
     # draw ship and sprites
     my_ship.draw(canvas)
-    a_rock.draw(canvas)
-    a_missile.draw(canvas)
     
     # update ship and sprites
     my_ship.update()
-    a_rock.update()
-    a_missile.update()
+    
+    proccess_sprite_group(missiles, canvas)
+    proccess_sprite_group(rocks, canvas)
     
     #draw score and lives
     canvas.draw_text('Score: ' + str(score), [WIDTH - 150, 50], 30, 'White')
     canvas.draw_text('Lives: ' + str(lives), [30, 50], 30, 'Yellow')
     
-# draw splash screen if not started
-if not started:
-    canvas.draw_image(splash_image, splash_info.get_center(), 
-                      splash_info.get_size(), [WIDTH / 2, HEIGHT / 2], 
-                      splash_info.get_size())
+    # draw splash screen if not started
+    if not started:
+        canvas.draw_image(splash_image, splash_info.get_center(), 
+                          splash_info.get_size(), [WIDTH / 2, HEIGHT / 2], 
+                          splash_info.get_size())
     
 # timer handler that spawns a rock    
 def rock_spawner():
     global rocks
+        
+    if len(rocks) < 12:
+        position = [random.randrange(0, WIDTH), random.randrange(0, HEIGHT)]
+        angle_vel = random.choice([0.02, -0.02])
+        velocity = [random.randrange(-1, 2), random.randrange(-1, 2)]
+        rocks.add(Sprite(position, velocity, 0, angle_vel, asteroid_image, asteroid_info))
     
-    position = [random.randrange(0, WIDTH), random.randrange(0, HEIGHT)]
-    angle = random.randrange(0, 7)
-    angle_vel = random.choice([0.02, -0.02])
-    velocity = [random.randrange(-1, 1), random.randrange(-1, 1)]
-
-    a_rock = Sprite(position, velocity, angle, angle_vel, asteroid_image, asteroid_info)
-            
 # initialize frame
 frame = simplegui.create_frame("Asteroids", WIDTH, HEIGHT)
 
 # initialize ship and two sprites
 my_ship = Ship([WIDTH / 2, HEIGHT / 2], [0, 0], 0, ship_image, ship_info)
-a_missile = Sprite([2 * WIDTH / 3, 2 * HEIGHT / 3], [-1,1], 0, 0, missile_image, missile_info, missile_sound)
 
 # register handlers
 frame.set_draw_handler(draw)
 frame.set_keydown_handler(keydown)
 frame.set_keyup_handler(keyup)
 frame.set_mouseclick_handler(click)
-
 timer = simplegui.create_timer(1000.0, rock_spawner)
 
 # get things rolling
