@@ -6,7 +6,7 @@ import random
 # globals for user interface
 WIDTH = 800
 HEIGHT = 600
-FIRING_ANGLE_VEL_INC = 0.02
+FIRING_ANGLE_VEL_INC = 0.05
 FRICTION = 0.992
 
 rocks = set([])
@@ -261,7 +261,7 @@ def click(pos):
         
 #draw handler
 def draw(canvas):
-    global time
+    global time, started, rocks, lives, score
     
     # animiate background
     time += 1
@@ -278,16 +278,23 @@ def draw(canvas):
     # update ship and sprites
     my_ship.update()
     if group_collide(rocks, my_ship):
-        global lives
         lives -= 1
     group_collide(rocks, my_ship)
+    
     if group_group_collide(missiles, rocks):
-        global score
-        lives += 1
+        score += 1
+
     group_group_collide(missiles, rocks)
         
     proccess_sprite_group(missiles, canvas)
     proccess_sprite_group(rocks, canvas)
+    
+    #restarts game if lives reach 0
+    if lives <= 0:
+        started = False
+        rocks = set([])
+        lives = 3
+        score = 0
     
     #draw score and lives
     canvas.draw_text('Score: ' + str(score), [WIDTH - 150, 50], 30, 'White')
@@ -303,7 +310,7 @@ def draw(canvas):
 def rock_spawner():
     global rocks
         
-    if len(rocks) < 12:
+    if len(rocks) < 12 and started:
         position = [random.randrange(0, WIDTH), random.randrange(0, HEIGHT)]
         angle_vel = random.choice([0.02, -0.02])
         velocity = [random.randrange(-1, 2), random.randrange(-1, 2)]
