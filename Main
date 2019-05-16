@@ -105,14 +105,31 @@ def wrap_screen(pos):
             pos[1] = 0 
 
 def proccess_sprite_group(group, canvas):
+    #updates, draws and removes sprites
     remove_sprites = []
     for sprite in group:
         sprite.update()
         sprite.draw(canvas)
         if sprite.update():
             remove_sprites.append(sprite)
-        group.difference_update(remove_sprites)
-                
+    group.difference_update(remove_sprites)
+  
+def group_collide(group, other_object):
+    #checks for collisions between an object and objects in a groups
+    remove_sprites = []
+    collisionFound = False
+    for sprite in group:
+        if sprite.collision(other_object):
+            remove_sprites.append(sprite)
+            collisionFound = True
+    group.difference_update(remove_sprites)
+    return collisionFound
+
+def group_group_collide(group1, group2):
+    #checks for collisions between objects in two groups
+    for sprite in list(group1):
+        return group_collide(group2, sprite)
+        
 # Ship class
 class Ship:
     def __init__(self, pos, vel, angle, image, info):
@@ -199,6 +216,12 @@ class Sprite:
             return True
         return False
       
+        
+    def collision(self, other_object):
+        if dist(self.pos, other_object.pos) < self.radius + other_object.radius:
+            return True
+        return False
+    
 #key and mouse handlers
 def keydown(key):    
     #turn ship
@@ -254,7 +277,15 @@ def draw(canvas):
     
     # update ship and sprites
     my_ship.update()
-    
+    if group_collide(rocks, my_ship):
+        global lives
+        lives -= 1
+    group_collide(rocks, my_ship)
+    if group_group_collide(missiles, rocks):
+        global score
+        lives += 1
+    group_group_collide(missiles, rocks)
+        
     proccess_sprite_group(missiles, canvas)
     proccess_sprite_group(rocks, canvas)
     
