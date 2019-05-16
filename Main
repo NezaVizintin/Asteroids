@@ -283,6 +283,7 @@ def draw(canvas):
     
     if group_group_collide(missiles, rocks):
         score += 1
+
     group_group_collide(missiles, rocks)
         
     proccess_sprite_group(missiles, canvas)
