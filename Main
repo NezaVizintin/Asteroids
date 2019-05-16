@@ -258,6 +258,7 @@ def click(pos):
     inheight = (center[1] - size[1] / 2) < pos[1] < (center[1] + size[1] / 2)
     if (not started) and inwidth and inheight:
         started = True        
+        soundtrack.play()
         
 #draw handler
 def draw(canvas):
@@ -295,7 +296,8 @@ def draw(canvas):
         rocks = set([])
         lives = 3
         score = 0
-    
+        soundtrack.rewind()
+
     #draw score and lives
     canvas.draw_text('Score: ' + str(score), [WIDTH - 150, 50], 30, 'White')
     canvas.draw_text('Lives: ' + str(lives), [30, 50], 30, 'Yellow')
@@ -305,7 +307,7 @@ def draw(canvas):
         canvas.draw_image(splash_image, splash_info.get_center(), 
                           splash_info.get_size(), [WIDTH / 2, HEIGHT / 2], 
                           splash_info.get_size())
-    
+
 # timer handler that spawns a rock    
 def rock_spawner():
     global rocks
