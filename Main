@@ -284,6 +284,7 @@ def draw(canvas):
     
     if group_group_collide(missiles, rocks):
         score += 1
+        
     group_group_collide(missiles, rocks)
         
     proccess_sprite_group(missiles, canvas)
@@ -296,6 +297,7 @@ def draw(canvas):
         lives = 3
         score = 0
         soundtrack.rewind()
+
     
     #draw score and lives
     canvas.draw_text('Score: ' + str(score), [WIDTH - 150, 50], 30, 'White')
